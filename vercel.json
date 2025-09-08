@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/ai/agent/image-edit/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
