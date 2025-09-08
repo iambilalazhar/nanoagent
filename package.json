@@ -57,7 +57,7 @@
     "react-resizable-panels": "^3.0.5",
     "react-syntax-highlighter": "^15.6.6",
     "recharts": "2.15.4",
-    "sharp": "^0.34.3",
+    "jimp": "^0.22.10",
     "sonner": "^2.0.7",
     "streamdown": "^1.2.0",
     "tailwind-merge": "^3.3.1",

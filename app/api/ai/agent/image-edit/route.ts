@@ -75,7 +75,7 @@ async function evaluateWithGemini({
 }
 
 export async function POST(req: NextRequest) {
-	const { default: sharp } = await import('sharp');
+	const Jimp = (await import('jimp')).default;
 	const formData = await req.formData();
 	const prompt = String(formData.get('prompt') || '').trim();
 	const imageFiles = formData.getAll('image').filter((f): f is File => f instanceof File);
@@ -92,11 +92,17 @@ export async function POST(req: NextRequest) {
 	const processedImages: { data: Uint8Array; mediaType: string }[] = [];
 	for (const imageFile of imageFiles) {
 		const uploadedArrayBuffer = await imageFile.arrayBuffer();
-		const normalizedBuffer = await sharp(Buffer.from(uploadedArrayBuffer))
-			.ensureAlpha()
-			.resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
-			.png({ quality: 95 })
-			.toBuffer();
+		const image = await Jimp.read(Buffer.from(uploadedArrayBuffer));
+		image.rgba(true);
+		const width = image.bitmap.width;
+		const height = image.bitmap.height;
+		const scale = Math.min(2048 / width, 2048 / height, 1);
+		image.resize(
+			Math.max(1, Math.round(width * scale)),
+			Math.max(1, Math.round(height * scale)),
+			Jimp.RESIZE_BILINEAR
+		);
+		const normalizedBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
 		processedImages.push({
 			data: new Uint8Array(normalizedBuffer.buffer, normalizedBuffer.byteOffset, normalizedBuffer.byteLength),
 			mediaType: 'image/png'
@@ -174,10 +180,9 @@ export async function POST(req: NextRequest) {
 					}
 
 					// Normalize the generated image
-					const candidatePng = await sharp(Buffer.from(decoded.bytes.buffer, decoded.bytes.byteOffset, decoded.bytes.byteLength))
-						.ensureAlpha()
-						.png({ quality: 95 })
-						.toBuffer();
+					const candidateImage = await Jimp.read(Buffer.from(decoded.bytes.buffer, decoded.bytes.byteOffset, decoded.bytes.byteLength));
+					candidateImage.rgba(true);
+					const candidatePng = await candidateImage.getBufferAsync(Jimp.MIME_PNG);
 					const candidate = new Uint8Array(candidatePng.buffer, candidatePng.byteOffset, candidatePng.byteLength);
 					const candidateMediaType = 'image/png';
 					enqueueFrame({ type: 'status', message: `Iteration ${i + 1}/${maxIterations}: image ready.` });
