@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import sharp from 'sharp';
 import { generateText } from 'ai';
 import { google } from '@/lib/ai/providers';
 
@@ -76,6 +75,7 @@ async function evaluateWithGemini({
 }
 
 export async function POST(req: NextRequest) {
+	const { default: sharp } = await import('sharp');
 	const formData = await req.formData();
 	const prompt = String(formData.get('prompt') || '').trim();
 	const imageFiles = formData.getAll('image').filter((f): f is File => f instanceof File);
