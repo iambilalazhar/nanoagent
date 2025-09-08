@@ -3,7 +3,6 @@ import { openai as defaultOpenAI, createOpenAI } from '@ai-sdk/openai';
 import { fal as defaultFal, createFal } from '@ai-sdk/fal';
 import { google as defaultGoogle, createGoogleGenerativeAI } from '@ai-sdk/google';
 
-// Centralized AI providers configuration.
 // Uses environment variables by default:
 // - OPENAI_API_KEY for OpenAI
 // - FAL_KEY for FAL
